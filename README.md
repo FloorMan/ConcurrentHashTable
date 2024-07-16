@@ -5,9 +5,9 @@
 This 
 
 ### Commands.txt
-The ```commands.txt``` file is the lifeblood of this program. **Make sure that the file is placed in the same directory as ```chash.c```**. If the file is placed anywhere else the program will not find it and won't produce any output. \
+The ```commands.txt``` file is the lifeblood of this program. **Make sure that the file is placed in the same directory as ```chash.c```**. If the file is placed anywhere else the program will not find it and won't produce any output. 
 
-Each command has to be on it's own line followed by a newline character \
+Each command has to be on it's own line followed by a newline character 
 
 ⚠️All insert operations must precede delete operations.⚠️ \
 &emsp; &emsp; This ensures that all entries are within the hashtable.
