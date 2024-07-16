@@ -44,7 +44,7 @@ Clone the repo to the same directory you have ```chash.c``` located. Then you wa
 
 
 
-<img src="WindowsInstalDirect.png" alt="drawing" width="500"/> \
+<img src="Images/WindowsInstalDirect.png" alt="drawing" width="500"/> \
  <span style="color:gray">Obviously replace the "Directory you are currently in" with the directory of chash.c. VSCode will have the top two automatically formatted for you when you start a new project, all you have to do is add a new path with ** appended to the end to include the libunistd folder. </span>
 
 We want to make sure we comment out the originals:
@@ -58,7 +58,7 @@ and include these two paths:
 #include <libunistd/unistd/unistd.h>
 ```
 
-<img src="WindowsChangeLines.png" alt="drawing" width="500"/>
+<img src="Images/WindowsChangeLines.png" alt="drawing" width="500"/>
 
 Finally, we include the following flag when compiling: 
 ```bash
