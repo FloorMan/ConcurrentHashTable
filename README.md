@@ -33,10 +33,11 @@ Used inside of ```chash.c```. Self explanatory.
 | search(key) | This function searches for a key-value pair in the hash table and returns the value if it exists. It computes the hash value, acquires a read lock, searches the linked list, and returns the value if found or NULL if not, then releases the lock.|
 
 
+<br> </br>
+<br> </br>
+# Compile Instructions
 
-## Compile Instructions
-
-### 🪟 WINDOWS
+## 🪟 WINDOWS
 When compiling using Windows, make sure to add the following #include path to your VScode instance so you don't get any wierd bugs. The following library is used to bring all the wonderful magic of unistd to Windows.
 <p style="text-align: center;">🔗<a href="https://github.com/robinrowe/libunistd">Robin Rowe's libunistd</a></p>
 
@@ -66,18 +67,18 @@ Finally, we include the following flag when compiling:
 ```
 
 
-
-### 🐧 LINUX
+<br> </br>
+## 🐧 LINUX
 All we need to do for compiling with Linux is to include the following flag since unistd is a UNIX library:
 ```bash
 ~$ gcc  chash.c  -lpthread
 ```
 
 
-## Important Notes
+# Important Notes
 "Libunistd supports all the common Linux POSIX calls,⚠️⚠️ EXCEPT FORK(). PLEASE DON'T FORK ⚠️⚠️. Use C++ standard threads or libunistd's POSIX pthreads instead.""
 
-## TODO
+# TODO
 * Implement OS detection
     * Two builds, one for 🪟 Windows and one for 🐧 Linux. (Two different versions of chash.c we use, only difference is the libraries used and compile instr.)  
 * ~Implement Hashing Alg.~
