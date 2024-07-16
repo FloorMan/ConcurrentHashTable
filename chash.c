@@ -5,83 +5,127 @@ When using pthread.h, we need to compile the program with the flag -lpthread
                     │ ~$ gcc  chash.c  -lpthread     │
                     ╰―――――――------------------―――――――╯
 */
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-// Uncomment out the include paths when compiling with linux and comment out the windows include path.
-// Reverse it for windows.
-#include <pthread.h> // Used for creating threads
-#include <unistd.h> // Used for the sleep() function
-
-//#include <libunistd/unistd/unistd.h>
-//#include <libunistd/unistd/pthread.h>
+// Header File
+#include "chash.h"
 
 
-// "Libunistd supports all the common Linux POSIX calls,⚠️⚠️ EXCEPT FORK(). PLEASE DON'T FORK ⚠️⚠️. Use C++ standard threads or libunistd's POSIX pthreads instead.""
-
-
-// Defines the size of our hashTable
-#define TABLE_SIZE 1000
-
-// Defines the structure for each hash record
-typedef struct hash_struct
-{
-  uint32_t hash;
-  char name[50];
-  uint32_t salary;
-  struct hash_struct *next;
-} HashRecord;
-
-
-// Defines the structure for the entire hash table.
-typedef struct hashtable_struct
-{
-  int count;
-  int size;
-  HashRecord ** records;
-} HashTable;
-
-
-// Holds thread number, name, status, etc...
-typedef struct thread_struct
-{
-  int threadNum;
-  char threadName[50];
-} thread_t; 
-
-
-// Definition for the Lock
-// pthread luckily provides us with a handy Read-Write lock struct
-pthread_rwlock_t lock;
 
 int main(){
 
   // We start off by reading in all of the commands from the commands.txt file
 
+  // Testing out the table Init, hash function, insert, search, delete
+
 
     return 0;
 }
-
 
 // =================================================================================
 //  ------------------------- HASHTABLE HELPER FUNCTIONS --------------------------
 // =================================================================================
 
-// Returns a new, empty HashTable
+//              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                             HASH FUNCTIONS
+//              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+// Returns an unsigned 32 bit integer (hash)
+// Uses the Jenkin's "One at a time" hash function
+uint32_t calculateHash(const uint8_t * name, size_t length){
+  size_t i = 0;
+  uint32_t hash = 0;
+  while (i != length) {
+    hash += name[i++];
+    hash += hash << 10;
+    hash ^= hash >> 6;
+  }
+  hash += hash << 3;
+  hash ^= hash >> 11;
+  hash += hash << 15;
+
+  return hash;
+}
+
+
+
+
+//              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                             INIT FUNCTIONS
+//              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// Returns a pointer to a new, empty HashTable
 HashTable * initHashTable(){
   HashTable * newHashTable = (HashTable*)malloc(sizeof(HashTable));
   newHashTable->count = 0;
-  newHashTable->size = TABLE_SIZE;
+  newHashTable->size = 0;
+  newHashTable->head = NULL;
 
-  // Allocating space for the main array of HashRecords, holds TABLE_SIZE amt of HashRecords
-  HashRecord ** newRecordArray = (HashRecord **)malloc(sizeof(HashRecord *) * TABLE_SIZE);
-  newHashTable->records = newRecordArray;
 
   return newHashTable;
 }
 
-// 0 = added to table | 1 = alr in table, updated
+// Returns a pointer to a new Hash Record
+HashRecord * initHashRecord(char * name, uint32_t salary){
+  HashRecord * newRecord = (HashRecord *)malloc(sizeof(HashRecord));
+
+  strcpy(newRecord->name, name);
+  newRecord->salary = salary;
+  newRecord->next = NULL;
+  newRecord->hash = calculateHash(name, strlen(name));
+
+  return newRecord;
+}
+
+
+//              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                             FREE FUNCTIONS
+//              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// TODO 
+// Implement linked list deletion for records
+
+// 😠😠😠 DESTROY BUILD DESTROY 😠😠😠
+// Returns 0 = record doesn't exist (NULL) | 1 = Frees name and record
+int destroyRecord(HashRecord * record){
+  if (record == NULL)
+    return 0;
+  free(record);
+
+  return 1;
+}
+
+
+
+// 😠😠😠 DESTROY BUILD DESTROY 😠😠😠
+// Goes thru the records array and frees each record
+void destroyTable(HashTable * table){
+
+  if (table == NULL)
+    return;
+
+  HashRecord * head = table->head; 
+  HashRecord * next;
+
+  while (head != NULL){
+    next = head->next;
+    destroyRecord(head);
+    head = next;
+  }
+
+  free(table);
+}
+
+
+
+
+
+
+
+//              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                             TABLE FUNCTIONS
+//              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// Returns 0 = added to table | 1 = alr in table, updated
 // Adds a name to the table, acquires a write lock, updates node, releases lock.
 int insert(char * name, uint32_t salary){
 
@@ -89,12 +133,21 @@ int insert(char * name, uint32_t salary){
   return 0;
 }
 
-void delete(char * name){
 
+// Returns 0 = not in table | 1 = found and deleted
+// Finds the name in the table and deletes it
+int delete(char * name){
+
+
+  return 0;
 }
 
-void search(char * name){
+// Returns name if found, NULL if not in table
+// Finds a name in the table
+char * search(char * name){
+  char * foundName = NULL;
 
+  return foundName;
 }
 
 
