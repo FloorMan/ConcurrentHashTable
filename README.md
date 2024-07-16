@@ -80,10 +80,11 @@ All we need to do for compiling with Linux is to include the following flag sinc
 ## TODO
 * Implement OS detection
     * Two builds, one for 🪟 Windows and one for 🐧 Linux. (Two different versions of chash.c we use, only difference is the libraries used and compile instr.)  
-* Implement Hashing Alg.
-* Implement HashTable
+* ~Implement Hashing Alg.~
+* ~Implement HashTable~
 * Ktinker GUI
-*
-*
+* Implement Thread Logic
+* Implement Scheduler
+* Implement command.txt parsing
 
 
