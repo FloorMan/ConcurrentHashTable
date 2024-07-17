@@ -8,6 +8,13 @@ When using pthread.h, we need to compile the program with the flag -lpthread
 // Header File
 #include "chash.h"
 
+struct command_t {
+    char command[8];       // 1st input per line: insert, delete, search, or print
+    char* name;        // 2nd input per line: may be an integer or a string name
+    int salary;           // 3rd input per line: integer
+};
+
+
 
 
 int main(){
@@ -15,6 +22,37 @@ int main(){
   // We start off by reading in all of the commands from the commands.txt file
 
   // Testing out the table Init, hash function, insert, search, delete
+
+
+
+  //Create an arrays of threads (needed to be fixed accordingly reading input from files)
+  int numThreads = 11;
+  pthread_t threads[numThreads];
+  struct command_t cmds[numThreads];
+
+  // Initialize commands (needed to be fixed accordingly reading input from files)
+  for (int i = 0; i < numThreads; i++){
+    strcpy(cmds[i].command, "insert");
+    cmds[i].name = "John";
+    cmds[i].salary = 1000;
+  }
+
+  //Create threads
+  for (int i = 0; i < numThreads; i++){
+     if (pthread_create(&threads[i], NULL, handleCommand, (void*)&cmds[i]) != 0) {
+            printf("Error creating thread %d\n", i);
+            return 1;
+        }
+  }
+
+  //Wait for all threads to finish
+  for (int i = 0; i < numThreads; i++){
+    pthread_join(threads[i], NULL);
+  }
+
+
+
+
 
 
     return 0;
@@ -116,11 +154,6 @@ void destroyTable(HashTable * table){
 }
 
 
-
-
-
-
-
 //              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                             TABLE FUNCTIONS
 //              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -161,4 +194,13 @@ thread_t * createThread(){
 
 
     return newThread;
+}
+
+void* handleCommand(void* arg) {
+    //struct command_t* cmd = (struct command_t*)arg;
+
+    // Your command handling logic here
+    
+
+    return NULL;
 }
