@@ -19,5 +19,10 @@
 ## Jenkins Hash Function
 * [Jenkins Hash Wiki](https://en.wikipedia.org/wiki/Jenkins_hash_function)
 
+
+## Tutorials for Makefile
+* [Good website for Makefile](https://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/)
+* [Good video for Makefile](https://www.youtube.com/watch?v=_r7i5X0rXJk)
+
 ## Links to ChatGPT prompts
 

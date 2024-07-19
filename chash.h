@@ -2,16 +2,15 @@
 #ifndef CHASH_H
 #define CHASH_H
 #include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
-// Uncomment out the include paths when compiling with linux and comment out the windows include path.
-// Reverse it for windows.
+#include <stdlib.h>
+#include <stdint.h>
+//#include "threadHandler.h"
+#include "parseCommands.h"
 #include <pthread.h> // Used for creating threads
 #include <unistd.h> // Used for the sleep() function
-//#include <libunistd/unistd/unistd.h>
-//#include <libunistd/unistd/pthread.h>
-
+//#include "libunistd/unistd/unistd.h"
+//#include "libunistd/unistd/pthread.h"
 // "Libunistd supports all the common Linux POSIX calls,⚠️⚠️ EXCEPT FORK(). PLEASE DON'T FORK ⚠️⚠️. Use C++ standard threads or libunistd's POSIX pthreads instead.""
 
 
@@ -19,7 +18,6 @@
 #define TABLE_SIZE 1000
 
 // Function prototypes
-
 
 // Defines the structure for each hash record
 typedef struct hash_struct
@@ -50,7 +48,7 @@ typedef struct thread_struct
 
 // Definition for the Lock
 // pthread luckily provides us with a handy Read-Write lock struct
-pthread_rwlock_t lock;
+//pthread_rwlock_t lock;
 
 
 

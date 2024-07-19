@@ -1,18 +1,34 @@
 /*
-                            ⚠️⚠️   IMPORTANT   ⚠️⚠️
-When using pthread.h, we need to compile the program with the flag -lpthread
-                    ╭―――――――------------------―――――――╮
-                    │ ~$ gcc  chash.c  -lpthread     │
-                    ╰―――――――------------------―――――――╯
+//                            ⚠️⚠️   IMPORTANT   ⚠️⚠️
+//When using pthread.h, we need to compile the program with the flag -lpthread
+//                    ╭―――――――------------------―――――――╮
+//                    │ ~$ gcc  chash.c  -lpthread     │
+//                    ╰―――――――------------------―――――――╯
 */
 // Header File
 #include "chash.h"
 
 
-
 int main(){
 
   // We start off by reading in all of the commands from the commands.txt file
+  // Utilizing the processInputs function from parseCommands.c
+  FILE * fileptr = fopen("commands.txt", "r");
+  // Command ** cmds from parseCommands.h, holds an array of command_t struct pointers 
+  Command ** cmds = processInputs(fileptr);
+
+  printCommands(cmds);
+
+  //int numThreads = cmds[0]->salary;
+
+  // Go through and free all of the memory allocated for the command_t structs
+  //  for (int i = 0; i < numThreads + 1; i++) {
+  //      free(cmds[i]);
+  //  }
+
+
+  //free(cmds);
+  fclose(fileptr);
 
   // Testing out the table Init, hash function, insert, search, delete
 
