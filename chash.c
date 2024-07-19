@@ -197,10 +197,24 @@ thread_t * createThread(){
 }
 
 void* handleCommand(void* arg) {
-    //struct command_t* cmd = (struct command_t*)arg;
+    struct command_t *cmd = (struct command_t *)arg;
 
-    // Your command handling logic here
-    
+    if (strcmp(cmd->command, "insert") == 0) {
+      // call insert function
+       
+    } else if (strcmp(cmd->command, "delete") == 0) {
+      // call delete function
+       
+
+    } else if (strcmp(cmd->command, "search") == 0) {
+      // call search function
+       
+    } else if (strcmp(cmd->command, "print") == 0) {
+      // call print function
+      
+    } else {
+        printf("Unknown command %s\n", cmd->command);
+    }
 
     return NULL;
 }
