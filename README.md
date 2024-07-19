@@ -62,7 +62,7 @@ and include these two paths:
 <img src="Images/WindowsChangeLines.png" alt="drawing" width="500"/>
 
 Finally, we include the following flag when compiling: 
-```bash
+```console
 ~$ gcc  chash.c  -lpthread
 ```
 
@@ -70,8 +70,15 @@ Finally, we include the following flag when compiling:
 <br> </br>
 ## 🐧 LINUX
 All we need to do for compiling with Linux is to include the following flag since unistd is a UNIX library:
-```bash
+```console
 ~$ gcc  chash.c  -lpthread
+```
+
+# Makefile
+To compile the entire project, all you have to do is run the command.
+```console
+~$ make
+~$ ./totalBuild
 ```
 
 
