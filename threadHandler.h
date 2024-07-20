@@ -8,16 +8,14 @@
 #include <pthread.h>
 #include <unistd.h>
 #include "parseCommands.h"
+#include "chash.h"
 
-  
-  
-  
-  
   //Create an arrays of threads (needed to be fixed accordingly reading input from files)
 int numberThreads;
 pthread_t threads[];
 struct command_t cmds[];
-
+// Needs head of hashtable to call commands from chash properly
+HashTable * head;
 
 void* handleCommand(void* arg)
 
