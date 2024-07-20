@@ -78,11 +78,23 @@ Command ** processInputs(FILE *ptr)
 }
 
 
+//              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                             GETTER FUNCTIONS
+//              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Returns the amount of threads to be created
+int getNumThreads(Command ** commandsArray)
+{
+    return commandsArray[0]->salary;
+}
+
+
+//              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                             PRINT FUNCTIONS
+//              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void printCommand(Command * command)
 {
   printf("|%s| |%s| |%d|\n", command->command,command->name,command->salary);
 }
-
 
 // Printing complete command_t struct information
 // Only run AFTER processInputs or else numThreads will be 0
@@ -95,4 +107,20 @@ void printCommands(Command ** commandsArray)
     {
         printCommand(commandsArray[i]);
     }
+}
+
+
+//              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                             FREE FUNCTIONS
+//              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Frees the Command array passed
+void freeCommands(Command ** cmds) {
+
+    int numThreads = cmds[0]->salary;
+
+    // Go through and free all of the memory allocated for the command_t structs
+    for (int i = 0; i < numThreads + 1; i++) {
+        free(cmds[i]);
+    }
+    free(cmds);
 }

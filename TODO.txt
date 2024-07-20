@@ -1,0 +1,12 @@
+TODO
+
+
+
+* Added free Function to parseCommands.c + .h
+* Added getNumThreads() function to parseCommands.c
+
+* LinkedList implementation
+	* Insertion
+	* Deletion
+	* Init
+	* Search

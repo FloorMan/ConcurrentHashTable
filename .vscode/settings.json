@@ -2,6 +2,9 @@
     "C_Cpp.errorSquiggles": "enabled",
     "files.associations": {
         "unistd.h": "c",
-        "parsecommands.h": "c"
+        "parsecommands.h": "c",
+        "chrono": "c",
+        "system_error": "c",
+        "xlocale": "c"
     }
 }

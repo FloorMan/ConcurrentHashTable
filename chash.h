@@ -25,7 +25,8 @@ typedef struct hash_struct
   uint32_t hash;
   char name[50];
   uint32_t salary;
-  struct hash_struct *next;
+  struct hash_struct * prev;
+  struct hash_struct * next;
 } HashRecord;
 
 
@@ -35,6 +36,7 @@ typedef struct hashtable_struct
   int count;
   int size;
   HashRecord * head;
+  HashRecord * tail;
 } HashTable;
 
 
@@ -57,9 +59,11 @@ HashTable * initHashTable();
 HashRecord * initHashRecord(char * name, uint32_t salary);
 int destroyRecord(HashRecord * record);
 void destroyTable(HashTable * table);
-int insert(char * name, uint32_t salary);
-int delete(char * name);
-char * search(char * name);
+int insert(HashTable * hashTable, char * name, uint32_t salary);
+int delete(HashTable * hashTable, char * name);
+HashRecord * search(HashTable * hashTable, char * name);
+void printTable(HashTable * hashTable);
+HashTable * readCommands(FILE * fileptr);
 thread_t * createThread();
 
 

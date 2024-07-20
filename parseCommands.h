@@ -26,7 +26,9 @@ typedef struct command_t{
 //method prototypes
 Command ** processInputs(FILE *ptr);
 void printCommand(Command * command);
+int getNumThreads(Command ** commandsArray);
 void printCommands(Command ** commandsArray);
+void freeCommands(Command ** commandsArray);
 
 
 #endif
