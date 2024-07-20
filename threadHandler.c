@@ -1,7 +1,8 @@
-#include "threadHandler.h"`
+#include "threadHandler.h"
 
 pthread_rwlock_t lock = PTHREAD_RWLOCK_INITIALIZER;
 
+void run_threads(void){
   // Initialize commands (needed to be fixed accordingly reading input from files)
   for (int i = 0; i < numThreads; i++){
     strcpy(cmds[i].command, "insert");
@@ -11,7 +12,7 @@ pthread_rwlock_t lock = PTHREAD_RWLOCK_INITIALIZER;
 
   //Create threads
   for (int i = 0; i < numThreads; i++){
-     if (pthread_create(&threads[i], NULL, handleCommand, (void*)&cmds[i]) != 0) {
+     if (pthread_create(&threads[i], NULL, handleCommand, (void*)&cmds[i]) != 0, &lock) {
             printf("Error creating thread %d\n", i);
             return 1;
         }
@@ -22,8 +23,8 @@ pthread_rwlock_t lock = PTHREAD_RWLOCK_INITIALIZER;
     pthread_join(threads[i], NULL);
   }
 
-
-void* handleCommand(void* arg) {
+}
+void* handleCommand(void* arg, void* lock) {
     pthread_rwlock_t *p = (pthread_rwlock_t *)arg;  
     struct command_t *cmd = (struct command_t *)arg;
 
@@ -85,5 +86,3 @@ void* handleCommand(void* arg) {
 
     return NULL;
 }
-
-
