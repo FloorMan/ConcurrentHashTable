@@ -232,7 +232,7 @@ void printTable(HashTable * hashTable){
     printf(" Salary: %.10d -> ", head->salary);
     head = head->next;
   }
-  printf("\n");
+  printf("NULL\n");
   head = hashTable->head;
   while (head != NULL){
     printf("| Hash:   %.10d ", head->hash);
