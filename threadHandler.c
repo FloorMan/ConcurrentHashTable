@@ -1,88 +1,98 @@
-#include "threadHandler.h"
+#include "parseCommands.h"
 
-pthread_rwlock_t lock = PTHREAD_RWLOCK_INITIALIZER;
+/*
+int main(void) {
+    FILE * fileptr = fopen("commands.txt", "r");
+    Command ** cmds = processInputs(fileptr);
+    printCommands(cmds);
 
-void run_threads(void){
-  // Initialize commands (needed to be fixed accordingly reading input from files)
-  for (int i = 0; i < numThreads; i++){
-    strcpy(cmds[i].command, "insert");
-    cmds[i].name = "John";
-    cmds[i].salary = 1000;
-  }
+    fclose(fileptr);
 
-  //Create threads
-  for (int i = 0; i < numThreads; i++){
-     if (pthread_create(&threads[i], NULL, handleCommand, (void*)&cmds[i]) != 0, &lock) {
-            printf("Error creating thread %d\n", i);
-            return 1;
-        }
-  }
+    int numThreads = cmds[0]->salary;
 
-  //Wait for all threads to finish
-  for (int i = 0; i < numThreads; i++){
-    pthread_join(threads[i], NULL);
-  }
-
-}
-void* handleCommand(void* arg, void* lock) {
-    pthread_rwlock_t *p = (pthread_rwlock_t *)arg;  
-    struct command_t *cmd = (struct command_t *)arg;
-
-    if (strcmp(cmd->command, "insert") == 0) {
-      //try writer lock. if fails exit 
-      if (pthread_rwlock_wrlock(p) != 0) {
-        perror("reader_thread: pthread_rwlock_wrlock error");
-        exit(__LINE__);
-      }
-      // call insert function
-      insert(head, cmd->name, cmd->salary);
-      //try unlock. if fails exit
-      if (pthread_rwlock_unlock(p) != 0) {
-        perror("reader thread: pthred_rwlock_unlock error");
-        exit(__LINE__);
-      }   
-    } else if (strcmp(cmd->command, "delete") == 0) {
-      //try writer lock. if fails exit 
-      if (pthread_rwlock_wrlock(p) != 0) {
-        perror("reader_thread: pthread_rwlock_wrlock error");
-        exit(__LINE__);
-      }
-      // call delete function
-      delete(head, cmd->name);
-      //try unlock. if fails exit
-      if (pthread_rwlock_unlock(p) != 0) {
-        perror("reader thread: pthred_rwlock_unlock error");
-        exit(__LINE__);
-      }   
-
-    } else if (strcmp(cmd->command, "search") == 0) {
-      //try reader lock. if fails exit 
-      if (pthread_rwlock_rdlock(p) != 0) {
-        perror("reader_thread: pthread_rwlock_rdlock error");
-        exit(__LINE__);
-      }
-      // call search function
-      search(head, cmd->name);
-      //try unlock. if fails exit
-      if (pthread_rwlock_unlock(p) != 0) {
-        perror("reader thread: pthred_rwlock_unlock error");
-        exit(__LINE__);
-      }   
-    } else if (strcmp(cmd->command, "print") == 0) {
-       if (pthread_rwlock_rdlock(p) != 0) {
-        perror("reader_thread: pthread_rwlock_rdlock error");
-        exit(__LINE__);
-      }
-      // call print function
-      printTable(head);
-      //try unlock. if fails exit
-      if (pthread_rwlock_unlock(p) != 0) {
-        perror("reader thread: pthred_rwlock_unlock error");
-        exit(__LINE__);
-      }   
-    } else {
-        printf("Unknown command %s\n", cmd->command);
+    // Go through and free all of the memory allocated for the command_t structs
+    for (int i = 0; i < numThreads + 1; i++) {
+        free(cmds[i]);
     }
+    free(cmds);
 
-    return NULL;
+    return 0;
+}
+*/
+
+
+/*
+// =================================================================================
+//  ------------------------- processInputs --------------------------
+// =================================================================================
+                Reads the inputs in the command.txt file, parses 
+                the data into an array of struct command_t, and
+                    returns a pointer to the array. 
+*/
+
+
+Command ** processInputs(FILE *ptr)
+{
+    //data declaration
+    char str0[COMMAND_SIZE] = {0};
+    char str1[NAME_SIZE] = {0};
+    int num;
+    int numThreads;
+    Command ** commandsArray; 
+
+    //checking if file is opened successfully
+    if (NULL == ptr) printf("file can't be opened \n");
+
+    // reading first line of file
+    fscanf(ptr, "%[^,;],%d,%d", str0, &numThreads, &num);
+
+    // validating first line of file
+    if(strcmp(str0, "threads") == 0){
+        // Creating array of structs
+        commandsArray = (Command **) malloc(sizeof(Command *) * (numThreads + 1));
+
+        // Stores the thread command in the first index of the array
+        commandsArray[0] = (Command *) malloc(sizeof(Command));
+        strcpy(commandsArray[0]->command, str0);
+        strcpy(commandsArray[0]->name, "threads");
+        commandsArray[0]->salary = numThreads;
+        
+        for(int i = 1; i < numThreads + 1; i++) 
+        {
+            // Creating new line present at the beginning of each subsequent line
+            char c = fgetc(ptr);
+            while(c != '\n' && c != EOF) c = fgetc(ptr);
+            
+            fscanf(ptr, "%[^,;],%[^,;],%d", str0, str1, &num);
+
+            // Allocating memory for each struct
+            commandsArray[i] = (Command *) malloc(sizeof(Command));
+            strcpy(commandsArray[i]->command, str0);
+            strcpy(commandsArray[i]->name, str1);
+            commandsArray[i]->salary = num;
+        }
+    }
+    else printf("First line invalid. Please check your file.");
+
+    return commandsArray;
+}
+
+
+void printCommand(Command * command)
+{
+  printf("|%s| |%s| |%d|\n", command->command,command->name,command->salary);
+}
+
+
+// Printing complete command_t struct information
+// Only run AFTER processInputs or else numThreads will be 0
+void printCommands(Command ** commandsArray)
+{
+    int numThreads = commandsArray[0]->salary;
+  
+    printf("-----------------------------------------\n");
+    for (int i = 0; i < numThreads + 1; i++)
+    {
+        printCommand(commandsArray[i]);
+    }
 }
