@@ -10,7 +10,11 @@ int writer = 0;
 int readers = 0;
 int inserts = 0;
 
-int run_threads(int numThreads, struct hashtable_struct * head, struct command_t ** cmds){
+pthread_t *threads;
+struct hashtable_struct * head;
+
+int run_threads(int numThreads, struct hashtable_struct * HashTable, struct command_t ** cmds){
+  head = HashTable;
   threads =(pthread_t *) malloc (numThreads*sizeof(pthread_t));
   //Create threads
   for (int i = 0; i < numThreads; i++){
@@ -25,6 +29,7 @@ int run_threads(int numThreads, struct hashtable_struct * head, struct command_t
   for (int i = 0; i < numThreads; i++){
     pthread_join(threads[i], NULL);
   }
+  free(threads);
   return 1;
 }
 void* handleCommand(void* arg) {
@@ -179,4 +184,3 @@ long long current_timestamp() {
   long long microseconds = (te.tv_sec * 1000000) + te.tv_usec; // calculate milliseconds
   return microseconds;
 }
-
