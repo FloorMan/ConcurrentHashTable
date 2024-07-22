@@ -1,98 +1,145 @@
-#include "parseCommands.h"
+#include "threadHandler.h"
 
-/*
-int main(void) {
-    FILE * fileptr = fopen("commands.txt", "r");
-    Command ** cmds = processInputs(fileptr);
-    printCommands(cmds);
+pthread_cond_t readerwait = PTHREAD_COND_INITIALIZER;
 
-    fclose(fileptr);
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t rlock = PTHREAD_MUTEX_INITIALIZER;
 
-    int numThreads = cmds[0]->salary;
+bool writer = false;
+int readers = 0;
 
-    // Go through and free all of the memory allocated for the command_t structs
-    for (int i = 0; i < numThreads + 1; i++) {
-        free(cmds[i]);
-    }
-    free(cmds);
-
-    return 0;
-}
-*/
-
-
-/*
-// =================================================================================
-//  ------------------------- processInputs --------------------------
-// =================================================================================
-                Reads the inputs in the command.txt file, parses 
-                the data into an array of struct command_t, and
-                    returns a pointer to the array. 
-*/
-
-
-Command ** processInputs(FILE *ptr)
-{
-    //data declaration
-    char str0[COMMAND_SIZE] = {0};
-    char str1[NAME_SIZE] = {0};
-    int num;
-    int numThreads;
-    Command ** commandsArray; 
-
-    //checking if file is opened successfully
-    if (NULL == ptr) printf("file can't be opened \n");
-
-    // reading first line of file
-    fscanf(ptr, "%[^,;],%d,%d", str0, &numThreads, &num);
-
-    // validating first line of file
-    if(strcmp(str0, "threads") == 0){
-        // Creating array of structs
-        commandsArray = (Command **) malloc(sizeof(Command *) * (numThreads + 1));
-
-        // Stores the thread command in the first index of the array
-        commandsArray[0] = (Command *) malloc(sizeof(Command));
-        strcpy(commandsArray[0]->command, str0);
-        strcpy(commandsArray[0]->name, "threads");
-        commandsArray[0]->salary = numThreads;
-        
-        for(int i = 1; i < numThreads + 1; i++) 
-        {
-            // Creating new line present at the beginning of each subsequent line
-            char c = fgetc(ptr);
-            while(c != '\n' && c != EOF) c = fgetc(ptr);
-            
-            fscanf(ptr, "%[^,;],%[^,;],%d", str0, str1, &num);
-
-            // Allocating memory for each struct
-            commandsArray[i] = (Command *) malloc(sizeof(Command));
-            strcpy(commandsArray[i]->command, str0);
-            strcpy(commandsArray[i]->name, str1);
-            commandsArray[i]->salary = num;
-        }
-    }
-    else printf("First line invalid. Please check your file.");
-
-    return commandsArray;
-}
-
-
-void printCommand(Command * command)
-{
-  printf("|%s| |%s| |%d|\n", command->command,command->name,command->salary);
-}
-
-
-// Printing complete command_t struct information
-// Only run AFTER processInputs or else numThreads will be 0
-void printCommands(Command ** commandsArray)
-{
-    int numThreads = commandsArray[0]->salary;
+void run_threads(void){
   
-    printf("-----------------------------------------\n");
-    for (int i = 0; i < numThreads + 1; i++)
-    {
-        printCommand(commandsArray[i]);
-    }
+  //Create threads
+  for (int i = 0; i < numThreads; i++){
+     if (pthread_create(&threads[i], NULL, handleCommand, (void*)&cmds[i]) != 0) {
+          perror("Error creating thread %d\n", i);
+          exit(__LINE__);
+        }
+  }
+
+  //Wait for all threads to finish
+  for (int i = 0; i < numThreads; i++){
+    pthread_join(threads[i], NULL);
+  }
+
 }
+void* handleCommand(void* arg) {
+    struct command_t *cmd = (struct command_t *)arg;
+    
+    if (strcmp(cmd->command, "insert") == 0) {
+      //writer lock
+      pthread_mutex_lock(&rlock);
+      while(writer)
+        pthread_cond_wait(&readerwait, &rlock);
+      
+      writer = true;
+
+      while(readers != 0){
+        pthread_cond_wait(&readerwait, &rlock);
+      }
+      pthread_mutex_unlock(&rlock);
+      pthread_mutex_lock(&lock);
+      printf("%llu: WRITE LOCK ACQUIRED", current_timestamp());
+
+      // call insert function
+      insert(head, cmd->name, cmd->salary);
+
+      //writer unlock
+      pthread_mutex_unlock(&lock);
+      writer = false;
+      pthread_cond_broadcast(&readerwait);
+      printf("%llu: WRITE LOCK RELEASED", current_timestamp());
+
+    } else if (strcmp(cmd->command, "delete") == 0) {
+      //writer lock
+      pthread_mutex_lock(&rlock);
+      while(writer)
+        pthread_cond_wait(&readerwait, &rlock);
+      
+      writer = true;
+
+      while(readers != 0){
+        pthread_cond_wait(&readerwait, &rlock);
+      }
+      pthread_mutex_unlock(&rlock);
+      pthread_mutex_lock(&lock);
+      printf("%llu: WRITE LOCK ACQUIRED", current_timestamp());
+
+      // call delete function
+      delete(head, cmd->name);
+
+      //writer unlock
+      pthread_mutex_unlock(&lock);
+      writer = false;
+      pthread_cond_broadcast(&readerwait);
+      printf("%llu: WRITE LOCK RELEASED", current_timestamp());
+
+    } else if (strcmp(cmd->command, "search") == 0) {
+      // reader lock
+      pthread_mutex_lock(&rlock);
+      while(writer){
+        pthread_cond_wait(&readerwait,&rlock);
+      }
+      readers++;
+      pthread_mutex_unlock(&rlock);
+      pthread_mutex_lock(&lock);
+      printf("%llu: READ LOCK ACQUIRED", current_timestamp());
+
+      // call search function
+      search(head, cmd->name);
+
+      //reader unlock
+      pthread_mutex_unlock(&lock);  
+      pthread_mutex_lock(&rlock);
+      readers--;
+      if (readers == 0){
+        pthread_cond_broadcast(&readerwait);
+      }
+      pthread_mutex_unlock(&rlock);
+      printf("%llu: READ LOCK RELEASED", current_timestamp());
+
+    } else if (strcmp(cmd->command, "print") == 0) {
+      // reader lock
+      pthread_mutex_lock(&rlock);
+      while(writer){
+        pthread_cond_wait(&readerwait,&rlock);
+      }
+      readers++;
+      pthread_mutex_unlock(&rlock);
+      pthread_mutex_lock(&lock);
+      printf("%llu: READ LOCK ACQUIRED", current_timestamp());
+
+      // call print function
+      printTable(head);
+
+      //reader unlock
+      pthread_mutex_unlock(&lock);  
+      pthread_mutex_lock(&rlock);
+      readers--;
+      if (readers == 0){
+        pthread_cond_broadcast(&readerwait);
+      }
+      pthread_mutex_unlock(&rlock);
+      printf("%llu: READ LOCK RELEASED", current_timestamp());
+
+    } else {
+        printf("Unknown command %s\n", cmd->command);
+    }
+
+    return NULL;
+}
+
+// =================================================================================
+//  ----------------------------- TIMESTAMP FUNCTION ------------------------------
+// =================================================================================
+// the timestamp function provided by Proffesor Aedo to get 
+// the current time in millisenconds since January 1, 1970 
+
+long long current_timestamp() {
+  struct timeval te;
+  gettimeofday(&te, NULL); // get current time
+  long long microseconds = (te.tv_sec * 1000000) + te.tv_usec; // calculate milliseconds
+  return microseconds;
+}
+
