@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include "parseCommands.h"
 #include "chash.h"
+#include "sys/time.h" //for time function
 
   //Create an arrays of threads (needed to be fixed accordingly reading input from files)
 int numThreads;
