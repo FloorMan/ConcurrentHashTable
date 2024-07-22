@@ -5,8 +5,8 @@
 CC = gcc
 CFLAGS = -I #USE: $(CFLAGS)
 
-DEPS = chash.h parseCommands.h #threadHandler.h
-OBJ = chash.o parseCommands.o #threadHandler.o
+DEPS = chash.h parseCommands.h threadHandler.h
+OBJ = chash.o parseCommands.o threadHandler.o
 
 # This rule creates the final executable. To run it type: ~$ ./totalBuild
 totalBuild: $(OBJ)
