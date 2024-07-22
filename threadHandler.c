@@ -71,7 +71,7 @@ void* handleCommand(void* arg) {
         fprintf(outptr, "%llu: WRITE LOCK ACQUIRED\n", current_timestamp());
         insert(head, cmd->name, cmd->salary);
         //printf("%llu: INSERT,%u,%s,%llu\n", current_timestamp(), calculateHash(cmd->name, strlen(cmd->name)), cmd->name, cmd->salary);
-        fprintf(outptr, "%llu: INSERT,%u,%s,%llu\n", current_timestamp(), calculateHash(cmd->name, strlen(cmd->name)), cmd->name, cmd->salary);
+        fprintf(outptr, "%llu: INSERT,%u,%s,%d\n", current_timestamp(), calculateHash(cmd->name, strlen(cmd->name)), cmd->name, cmd->salary);
 
         pthread_mutex_lock(&lock);
         active_writers--;
@@ -127,7 +127,7 @@ void* handleCommand(void* arg) {
             fprintf(outptr, "%llu: SEARCH: NOT FOUND NOT FOUND\n", current_timestamp());
         } else {
             //printf("%llu: SEARCH: %u,%s,%llu\n", current_timestamp(), result->hash, result->name, result->salary);
-            fprintf(outptr, "%llu: SEARCH: %u,%s,%llu\n", current_timestamp(), result->hash, result->name, result->salary);
+            fprintf(outptr, "%llu: SEARCH: %u,%s,%d\n", current_timestamp(), result->hash, result->name, result->salary);
         }
 
         pthread_mutex_lock(&lock);
