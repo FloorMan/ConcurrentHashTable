@@ -10,8 +10,8 @@ int writer = 0;
 int readers = 0;
 int inserts = 0;
 
-void run_threads(void){
-  
+int run_threads(int numThreads, struct hashtable_struct * head, struct command_t ** cmds){
+  threads =(pthread_t *) malloc (numThreads*sizeof(pthread_t));
   //Create threads
   for (int i = 0; i < numThreads; i++){
      if (pthread_create(&threads[i], NULL, handleCommand, (void*)&cmds[i]) != 0) {
@@ -25,7 +25,7 @@ void run_threads(void){
   for (int i = 0; i < numThreads; i++){
     pthread_join(threads[i], NULL);
   }
-
+  return 1;
 }
 void* handleCommand(void* arg) {
     struct command_t *cmd = (struct command_t *)arg;
