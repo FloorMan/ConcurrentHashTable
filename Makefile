@@ -22,8 +22,8 @@ chash.o: chash.c chash.h
 	gcc -c chash.c
 
 #	Uncomment out the below two lines when the threadhandler is implemented
-#threadHandler.o: threadHandler.c threadHandler.h
-#	gcc -c threadHandler.c
+threadHandler.o: threadHandler.c threadHandler.h
+	gcc -c threadHandler.c
 
 
 
