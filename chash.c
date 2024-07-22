@@ -254,7 +254,7 @@ HashTable * readCommands(FILE * ptr){
   int numThreads = getNumThreads(cmds);
   int success = 0;
 
-
+  success = run_threads(numThreads, hashTable, cmds);
 
   for (int i = 1; i < numThreads + 1; i++){
     if (strcmp(cmds[i]->command, "insert") == 0){
