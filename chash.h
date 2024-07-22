@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
-//#include "threadHandler.h"
+#include "threadHandler.h"
 #include "parseCommands.h"
 #include <pthread.h> // Used for creating threads
 #include <unistd.h> // Used for the sleep() function
