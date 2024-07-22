@@ -1,169 +1,144 @@
 #include "threadHandler.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <sys/time.h>
 
-pthread_cond_t readerwait = PTHREAD_COND_INITIALIZER;
-pthread_cond_t insertwait = PTHREAD_COND_INITIALIZER;
-
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t rlock = PTHREAD_MUTEX_INITIALIZER;
-
-int writer = 0;
-int readers = 0;
-int inserts = 0;
 
 pthread_t *threads;
 struct hashtable_struct * head;
 
+int locks_acquired = 0;
+int locks_released = 0;
+int active_writers = 0;
+int waiting_writers = 0;
+int active_readers = 0;
+
 int run_threads(int numThreads, struct hashtable_struct * HashTable, struct command_t ** cmds){
   head = HashTable;
-  threads =(pthread_t *) malloc (numThreads*sizeof(pthread_t));
-  //Create threads
+  threads = (pthread_t *) malloc(numThreads * sizeof(pthread_t));
+  printf("Running %d threads\n", numThreads);
   for (int i = 0; i < numThreads; i++){
-     if (pthread_create(&threads[i], NULL, handleCommand, (void*)&cmds[i]) != 0) {
-          fprintf(stderr,"Error creating thread %d\n",i);
+     if (pthread_create(&threads[i], NULL, handleCommand, (void*)cmds[i]) != 0) {
+          fprintf(stderr, "Error creating thread %d\n", i);
           perror("");
           exit(__LINE__);
         }
   }
 
-  //Wait for all threads to finish
   for (int i = 0; i < numThreads; i++){
     pthread_join(threads[i], NULL);
   }
   free(threads);
+  
+  printf("Finished all threads.\n");
+  printf("Number of lock acquisitions:  %d\n", locks_acquired);
+  printf("Number of lock releases:  %d\n", locks_released);
   return 1;
 }
+
 void* handleCommand(void* arg) {
     struct command_t *cmd = (struct command_t *)arg;
-    
+
     if (strcmp(cmd->command, "insert") == 0) {
-      //writer lock
-      pthread_mutex_lock(&rlock);
+        pthread_mutex_lock(&lock);
+        locks_acquired++;
+        waiting_writers++;
+        while (active_readers > 0 || active_writers > 0) {
+            printf("%llu: WAITING ON INSERTS\n", current_timestamp());
+            pthread_cond_wait(&cond, &lock);
+        }
+        waiting_writers--;
+        active_writers++;
+        pthread_mutex_unlock(&lock);
 
-      inserts++;
+        printf("%llu: WRITE LOCK ACQUIRED\n", current_timestamp());
+        insert(head, cmd->name, cmd->salary);
+        printf("%llu: INSERT,%u,%s,%llu\n", current_timestamp(), calculateHash(cmd->name, strlen(cmd->name)), cmd->name, cmd->salary);
 
-      while(writer)
-        printf("%llu: Awaiting other writers", current_timestamp());
-        pthread_cond_wait(&readerwait, &rlock);
-        printf("%llu: Insert Awaken", current_timestamp());
-      
-      writer = 1;
+        pthread_mutex_lock(&lock);
+        active_writers--;
+        pthread_cond_broadcast(&cond);
+        pthread_mutex_unlock(&lock);
 
-      while(readers != 0){
-        printf("%llu: Awaiting readers", current_timestamp());
-        pthread_cond_wait(&readerwait, &rlock);
-        printf("%llu: Insert Awaken", current_timestamp());
-      }
-      pthread_mutex_unlock(&rlock);
-      pthread_mutex_lock(&lock);
-      printf("%llu: WRITE LOCK ACQUIRED", current_timestamp());
-
-      // call insert function
-      insert(head, cmd->name, cmd->salary);
-      printf("%llu: INSERT, %s, %llu", current_timestamp(),cmd->name,cmd->salary);
-
-      //writer unlock
-      pthread_mutex_unlock(&lock);
-      pthread_mutex_lock(&rlock);
-      inserts--;
-      if (inserts == 0){
-        pthread_cond_broadcast(&insertwait);
-        printf("%llu: Signal deletes", current_timestamp());
-      }
-      pthread_mutex_unlock(&rlock);
-      writer = 0;
-      pthread_cond_broadcast(&readerwait);
-      printf("%llu: WRITE LOCK RELEASED", current_timestamp());
+        printf("%llu: WRITE LOCK RELEASED\n", current_timestamp());
+        locks_released++;
 
     } else if (strcmp(cmd->command, "delete") == 0) {
-      //writer lock
-      pthread_mutex_lock(&rlock);
-      while(writer)
-        printf("%llu: Awaiting other writers", current_timestamp());
-        pthread_cond_wait(&readerwait, &rlock);
-        printf("%llu: Delete Awaken", current_timestamp());
-      
-      writer = 1;
+        pthread_mutex_lock(&lock);
+        locks_acquired++;
+        waiting_writers++;
+        while (active_readers > 0 || active_writers > 0) {
+            pthread_cond_wait(&cond, &lock);
+        }
+        waiting_writers--;
+        active_writers++;
+        pthread_mutex_unlock(&lock);
 
-      while(readers != 0){
-        printf("%llu: Awaiting readers", current_timestamp());
-        pthread_cond_wait(&readerwait, &rlock);
-        printf("%llu: Delete Awaken", current_timestamp());
-      }
-      while(inserts != 0){
-        printf("%llu: Awaiting insers", current_timestamp());
-        pthread_cond_wait(&insertwait, &rlock);
-        printf("%llu: Delete Awaken", current_timestamp());
-      }
-      pthread_mutex_unlock(&rlock);
-      pthread_mutex_lock(&lock);
-      printf("%llu: WRITE LOCK ACQUIRED", current_timestamp());
+        printf("%llu: DELETE AWAKENED\n", current_timestamp());
+        printf("%llu: WRITE LOCK ACQUIRED\n", current_timestamp());
+        delete(head, cmd->name);
+        printf("%llu: DELETE,%s\n", current_timestamp(), cmd->name);
 
-      // call delete function
-      delete(head, cmd->name);
-      printf("%llu: DELETE, %s", current_timestamp(),cmd->name);
+        pthread_mutex_lock(&lock);
+        active_writers--;
+        pthread_cond_broadcast(&cond);
+        pthread_mutex_unlock(&lock);
 
-      //writer unlock
-      pthread_mutex_unlock(&lock);
-      writer = 0;
-      pthread_cond_broadcast(&readerwait);
-      printf("%llu: Signaled readers and writers", current_timestamp());
-      printf("%llu: WRITE LOCK RELEASED", current_timestamp());
+        printf("%llu: WRITE LOCK RELEASED\n", current_timestamp());
+        locks_released++;
 
     } else if (strcmp(cmd->command, "search") == 0) {
-      // reader lock
-      pthread_mutex_lock(&rlock);
-      while(writer){
-        printf("%llu: Awaiting writers", current_timestamp());
-        pthread_cond_wait(&readerwait,&rlock);
-        printf("%llu: Search Awakened", current_timestamp());
-      }
-      readers++;
-      pthread_mutex_unlock(&rlock);
-      pthread_mutex_lock(&lock);
-      printf("%llu: READ LOCK ACQUIRED", current_timestamp());
+        pthread_mutex_lock(&lock);
+        locks_acquired++;
+        while (active_writers > 0 || waiting_writers > 0) {
+            pthread_cond_wait(&cond, &lock);
+        }
+        active_readers++;
+        pthread_mutex_unlock(&lock);
 
-      // call search function
-      search(head, cmd->name);
-      printf("%llu: SEARCH, %s", current_timestamp(),cmd->name);
+        printf("%llu: READ LOCK ACQUIRED\n", current_timestamp());
+        HashRecord * result = search(head, cmd->name);
+        if (result == NULL) {
+            printf("%llu: SEARCH: NOT FOUND NOT FOUND\n", current_timestamp());
+        } else {
+            printf("%llu: SEARCH: %u,%s,%llu\n", current_timestamp(), result->hash, result->name, result->salary);
+        }
 
-      //reader unlock
-      pthread_mutex_unlock(&lock);  
-      pthread_mutex_lock(&rlock);
-      readers--;
-      if (readers == 0){
-        pthread_cond_broadcast(&readerwait);
-        printf("%llu: Signal all awaiting readers", current_timestamp());
-      }
-      pthread_mutex_unlock(&rlock);
-      printf("%llu: READ LOCK RELEASED", current_timestamp());
+        pthread_mutex_lock(&lock);
+        active_readers--;
+        if (active_readers == 0) {
+            pthread_cond_broadcast(&cond);
+        }
+        pthread_mutex_unlock(&lock);
+
+        printf("%llu: READ LOCK RELEASED\n", current_timestamp());
+        locks_released++;
 
     } else if (strcmp(cmd->command, "print") == 0) {
-      // reader lock
-      pthread_mutex_lock(&rlock);
-      while(writer){
-        printf("%llu: Awaiting writers", current_timestamp());
-        pthread_cond_wait(&readerwait,&rlock);
-        printf("%llu: Search Awakened", current_timestamp());
-      }
-      readers++;
-      pthread_mutex_unlock(&rlock);
-      pthread_mutex_lock(&lock);
-      printf("%llu: READ LOCK ACQUIRED", current_timestamp());
+        pthread_mutex_lock(&lock);
+        locks_acquired++;
+        while (active_writers > 0 || waiting_writers > 0) {
+            pthread_cond_wait(&cond, &lock);
+        }
+        active_readers++;
+        pthread_mutex_unlock(&lock);
 
-      // call print function
-      printTable(head);
-      printf("%llu: print table", current_timestamp());
+        printf("%llu: READ LOCK ACQUIRED\n", current_timestamp());
+        printTable(head);
 
-      //reader unlock
-      pthread_mutex_unlock(&lock);  
-      pthread_mutex_lock(&rlock);
-      readers--;
-      if (readers == 0){
-        pthread_cond_broadcast(&readerwait);
-        printf("%llu: Signal all awaiting readers", current_timestamp());
-      }
-      pthread_mutex_unlock(&rlock);
-      printf("%llu: READ LOCK RELEASED", current_timestamp());
+        pthread_mutex_lock(&lock);
+        active_readers--;
+        if (active_readers == 0) {
+            pthread_cond_broadcast(&cond);
+        }
+        pthread_mutex_unlock(&lock);
+
+        printf("%llu: READ LOCK RELEASED\n", current_timestamp());
+        locks_released++;
 
     } else {
         printf("Unknown command %s\n", cmd->command);
@@ -175,12 +150,12 @@ void* handleCommand(void* arg) {
 // =================================================================================
 //  ----------------------------- TIMESTAMP FUNCTION ------------------------------
 // =================================================================================
-// the timestamp function provided by Proffesor Aedo to get 
-// the current time in millisenconds since January 1, 1970 
+// the timestamp function provided by Professor Aedo to get 
+// the current time in usenconds since January 1, 1970 
 
 long long current_timestamp() {
   struct timeval te;
   gettimeofday(&te, NULL); // get current time
-  long long microseconds = (te.tv_sec * 1000000) + te.tv_usec; // calculate milliseconds
+  long long microseconds = (te.tv_sec * 1000000) + te.tv_usec; // calculate useconds
   return microseconds;
 }
