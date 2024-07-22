@@ -7,21 +7,20 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include "sys/time.h"
 #include "parseCommands.h"
 #include "chash.h"
-#include "sys/time.h" //for time function
 
   //Create an arrays of threads (needed to be fixed accordingly reading input from files)
-int numThreads;
-pthread_t threads[];
-struct command_t cmds[];
+
+pthread_t *threads;
 // Needs head of hashtable to call commands from chash properly
 struct hashtable_struct * head;
 
-//method prototypes
-void run_threads(void);
+int run_threads(int numThreads, struct hashtable_struct * head, struct command_t ** cmds);
 void* handleCommand(void* arg);
-long long current_timestamp(); 
+long long current_timestamp();
+
 
 
 #endif 
