@@ -11,13 +11,14 @@
 #include "chash.h"
 
   //Create an arrays of threads (needed to be fixed accordingly reading input from files)
-int numberThreads;
+int numThreads;
 pthread_t threads[];
 struct command_t cmds[];
 // Needs head of hashtable to call commands from chash properly
-HashTable * head;
+struct hashtable_struct * head;
 
-void* handleCommand(void* arg)
+void run_threads(void);
+void* handleCommand(void* arg);
 
 
 
