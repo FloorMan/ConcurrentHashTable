@@ -13,9 +13,9 @@
 
   //Create an arrays of threads (needed to be fixed accordingly reading input from files)
 
-pthread_t *threads;
+extern pthread_t *threads;
 // Needs head of hashtable to call commands from chash properly
-struct hashtable_struct * head;
+extern struct hashtable_struct * head;
 
 int run_threads(int numThreads, struct hashtable_struct * head, struct command_t ** cmds);
 void* handleCommand(void* arg);
