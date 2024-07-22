@@ -13,7 +13,8 @@ void run_threads(void){
   //Create threads
   for (int i = 0; i < numThreads; i++){
      if (pthread_create(&threads[i], NULL, handleCommand, (void*)&cmds[i]) != 0) {
-          perror("Error creating thread %d\n", i);
+          fprintf(stderr,"Error creating thread %d\n",i);
+          perror("");
           exit(__LINE__);
         }
   }
@@ -142,4 +143,3 @@ long long current_timestamp() {
   long long microseconds = (te.tv_sec * 1000000) + te.tv_usec; // calculate milliseconds
   return microseconds;
 }
-
