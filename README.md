@@ -2,8 +2,51 @@
 
 ## Concurrent Hash Table
 
-This 
+This Concurrent Hash Table takes a file (```commands.txt```) and seperates each command and adds it to a Hash Table, concurrently. Each command is given to a seperate thread, waiting on a single read/write lock, allowing for a concurrent and efficient Hash Table implementation. Outputs to ```output.txt``` and opens a GUI to display.
 
+# Compile Instructions
+
+To run the hashtable, all you need to do is clone the repo to a directory and run the following command (while in the directory):
+```console
+~$ make
+```
+This command should automatically compile the project and run, opening up a GUI to see the results. 
+
+
+## 🪟 WINDOWS
+When compiling using Windows, make sure to add the following #include path to your VScode instance so you don't get any wierd bugs. The following library is used to bring all the wonderful magic of unistd to Windows.
+<p style="text-align: center;">🔗<a href="https://github.com/robinrowe/libunistd">Robin Rowe's libunistd</a></p>
+
+Clone the repo to the same directory you have ```chash.c``` located. Then you want to update your includePath in VSCode to include libunistd [unistd.h and pthreads.h]
+
+
+
+<img src="Images/WindowsInstalDirect.png" alt="drawing" width="500"/> \
+ <span style="color:gray">Obviously replace the "Directory you are currently in" with the directory of chash.c. VSCode will have the top two automatically formatted for you when you start a new project, all you have to do is add a new path with ** appended to the end to include the libunistd folder. </span>
+
+We want to make sure we comment out the originals:
+```c
+#include <pthread.h>
+#include <unistd.h>
+```
+and include these two paths:
+```c
+#include <libunistd/unistd/pthread.h>
+#include <libunistd/unistd/unistd.h>
+```
+
+<img src="Images/WindowsChangeLines.png" alt="drawing" width="500"/>
+
+Finally, we include the following flag when compiling: 
+```console
+~$ gcc  chash.c  -lpthread
+```
+
+## 🐧 LINUX
+All we need to do for compiling with Linux is to include the following flag since unistd is a UNIX library:
+```console
+~$ gcc  chash.c  -lpthread
+```
 ### Commands.txt
 The ```commands.txt``` file is the lifeblood of this program. **Make sure that the file is placed in the same directory as ```chash.c```**. If the file is placed anywhere else the program will not find it and won't produce any output. 
 
@@ -35,64 +78,9 @@ Used inside of ```chash.c```. Self explanatory.
 
 <br> </br>
 <br> </br>
-# Compile Instructions
 
-## 🪟 WINDOWS
-When compiling using Windows, make sure to add the following #include path to your VScode instance so you don't get any wierd bugs. The following library is used to bring all the wonderful magic of unistd to Windows.
-<p style="text-align: center;">🔗<a href="https://github.com/robinrowe/libunistd">Robin Rowe's libunistd</a></p>
-
-Clone the repo to the same directory you have ```chash.c``` located. Then you want to update your includePath in VSCode to include libunistd [unistd.h and pthreads.h]
-
-
-
-<img src="Images/WindowsInstalDirect.png" alt="drawing" width="500"/> \
- <span style="color:gray">Obviously replace the "Directory you are currently in" with the directory of chash.c. VSCode will have the top two automatically formatted for you when you start a new project, all you have to do is add a new path with ** appended to the end to include the libunistd folder. </span>
-
-We want to make sure we comment out the originals:
-```c
-#include <pthread.h>
-#include <unistd.h>
-```
-and include these two paths:
-```c
-#include <libunistd/unistd/pthread.h>
-#include <libunistd/unistd/unistd.h>
-```
-
-<img src="Images/WindowsChangeLines.png" alt="drawing" width="500"/>
-
-Finally, we include the following flag when compiling: 
-```console
-~$ gcc  chash.c  -lpthread
-```
-
-
-<br> </br>
-## 🐧 LINUX
-All we need to do for compiling with Linux is to include the following flag since unistd is a UNIX library:
-```console
-~$ gcc  chash.c  -lpthread
-```
-
-# Makefile
-To compile the entire project, all you have to do is run the command.
-```console
-~$ make
-~$ ./totalBuild
-```
 
 
 # Important Notes
 "Libunistd supports all the common Linux POSIX calls,⚠️⚠️ EXCEPT FORK(). PLEASE DON'T FORK ⚠️⚠️. Use C++ standard threads or libunistd's POSIX pthreads instead.""
-
-# TODO
-* Implement OS detection
-    * Two builds, one for 🪟 Windows and one for 🐧 Linux. (Two different versions of chash.c we use, only difference is the libraries used and compile instr.)  
-* ~Implement Hashing Alg.~
-* ~Implement HashTable~
-* Ktinker GUI
-* Implement Thread Logic
-* Implement Scheduler
-* Implement command.txt parsing
-
 
