@@ -5,7 +5,7 @@ pthread_cond_t readerwait = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t rlock = PTHREAD_MUTEX_INITIALIZER;
 
-bool writer = false;
+int writer = 0;
 int readers = 0;
 
 void run_threads(void){
@@ -33,7 +33,7 @@ void* handleCommand(void* arg) {
       while(writer)
         pthread_cond_wait(&readerwait, &rlock);
       
-      writer = true;
+      writer = 1;
 
       while(readers != 0){
         pthread_cond_wait(&readerwait, &rlock);
@@ -47,7 +47,7 @@ void* handleCommand(void* arg) {
 
       //writer unlock
       pthread_mutex_unlock(&lock);
-      writer = false;
+      writer = 0;
       pthread_cond_broadcast(&readerwait);
       printf("%llu: WRITE LOCK RELEASED", current_timestamp());
 
@@ -57,7 +57,7 @@ void* handleCommand(void* arg) {
       while(writer)
         pthread_cond_wait(&readerwait, &rlock);
       
-      writer = true;
+      writer = 1;
 
       while(readers != 0){
         pthread_cond_wait(&readerwait, &rlock);
@@ -71,7 +71,7 @@ void* handleCommand(void* arg) {
 
       //writer unlock
       pthread_mutex_unlock(&lock);
-      writer = false;
+      writer = 0;
       pthread_cond_broadcast(&readerwait);
       printf("%llu: WRITE LOCK RELEASED", current_timestamp());
 
