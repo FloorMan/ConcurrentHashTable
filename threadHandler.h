@@ -18,9 +18,10 @@ struct command_t cmds[];
 // Needs head of hashtable to call commands from chash properly
 struct hashtable_struct * head;
 
+//method prototypes
 void run_threads(void);
 void* handleCommand(void* arg);
-
+long long current_timestamp(); 
 
 
 #endif 
