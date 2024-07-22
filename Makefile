@@ -5,8 +5,8 @@
 CC = gcc
 CFLAGS = -I #USE: $(CFLAGS)
 
-DEPS = chash.h parseCommands.h #threadHandler.h
-OBJ = chash.o parseCommands.o #threadHandler.o
+DEPS = chash.h parseCommands.h threadHandler.h
+OBJ = chash.o parseCommands.o threadHandler.o
 
 # This rule creates the final executable. To run it type: ~$ ./totalBuild
 totalBuild: $(OBJ)
@@ -22,8 +22,8 @@ chash.o: chash.c chash.h
 	gcc -c chash.c
 
 #	Uncomment out the below two lines when the threadhandler is implemented
-#threadHandler.o: threadHandler.c threadHandler.h
-#	gcc -c threadHandler.c
+threadHandler.o: threadHandler.c threadHandler.h
+	gcc -c threadHandler.c
 
 
 
