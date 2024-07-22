@@ -8,9 +8,18 @@ CFLAGS = -I #USE: $(CFLAGS)
 DEPS = chash.h parseCommands.h threadHandler.h
 OBJ = chash.o parseCommands.o threadHandler.o
 
+# The two rules below automatically runs the compiled c scripts and runs the 
+# Python script to display the output.
+print: execute
+	python3 PYGUI.py
+
+execute: totalBuild
+	./totalBuild
+
+
 # This rule creates the final executable. To run it type: ~$ ./totalBuild
 totalBuild: $(OBJ)
-	$(CC) -o $@ $^ 
+	$(CC) -o $@ $^
 
 # The -c flag instructs gcc to only compile to an object file (.o) but
 # not use the linker
