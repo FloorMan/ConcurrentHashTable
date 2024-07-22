@@ -22,7 +22,7 @@ int run_threads(int numThreads, struct hashtable_struct * HashTable, struct comm
   threads = (pthread_t *) malloc(numThreads * sizeof(pthread_t));
   printf("Running %d threads\n", numThreads);
   for (int i = 0; i < numThreads; i++){
-     if (pthread_create(&threads[i], NULL, handleCommand, (void*)cmds[i]) != 0) {
+     if (pthread_create(&threads[i], NULL, handleCommand, (void*)cmds[i+1]) != 0) {
           fprintf(stderr, "Error creating thread %d\n", i);
           perror("");
           exit(__LINE__);
@@ -141,7 +141,7 @@ void* handleCommand(void* arg) {
         locks_released++;
 
     } else {
-        printf("Unknown command %s\n", cmd->command);
+          printf("Unknown command %s\n", cmd->command);
     }
 
     return NULL;
