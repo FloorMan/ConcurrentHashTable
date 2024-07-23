@@ -1,9 +1,4 @@
 #include "threadHandler.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <pthread.h>
-#include <sys/time.h>
 
 //for outputing to file
 FILE *outptr;
@@ -150,11 +145,13 @@ void* handleCommand(void* arg) {
         active_readers++;
         pthread_mutex_unlock(&lock);
 
-        //printf("%llu: READ LOCK ACQUIRED\n", current_timestamp());
-        fprintf(outptr, "%llu: READ LOCK ACQUIRED\n", current_timestamp());
-        printTable(head);
+        
+        
 
         pthread_mutex_lock(&lock);
+        //printf("%llu: READ LOCK ACQUIRED\n", current_timestamp());
+        fprintf(outptr, "%llu: READ LOCK ACQUIRED\n", current_timestamp());
+        printTableToFile(outptr, head);
         active_readers--;
         if (active_readers == 0) {
             pthread_cond_broadcast(&cond);

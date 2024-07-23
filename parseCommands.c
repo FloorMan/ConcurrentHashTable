@@ -1,27 +1,6 @@
 #include "parseCommands.h"
 
 /*
-int main(void) {
-    FILE * fileptr = fopen("commands.txt", "r");
-    Command ** cmds = processInputs(fileptr);
-    printCommands(cmds);
-
-    fclose(fileptr);
-
-    int numThreads = cmds[0]->salary;
-
-    // Go through and free all of the memory allocated for the command_t structs
-    for (int i = 0; i < numThreads + 1; i++) {
-        free(cmds[i]);
-    }
-    free(cmds);
-
-    return 0;
-}
-*/
-
-
-/*
 // =================================================================================
 //  ------------------------- processInputs --------------------------
 // =================================================================================

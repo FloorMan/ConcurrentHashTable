@@ -157,6 +157,7 @@ int insert(HashTable *hashTable, char *name, uint32_t salary) {
   }
 
   HashRecord *newRecord = initHashRecord(name, salary);
+  hashTable->count++;
   // If the hashTable is empty, add the record to the head
   // If not, add to the end of the list
   if (hashTable->head == NULL) {
@@ -197,11 +198,45 @@ int delete (HashTable *hashTable, char *name) {
     // next record
     foundName->prev->next = foundName->next;
   }
+  hashTable->count--;
 
   destroyRecord(foundName);
   return 0;
 }
 
+// Takes a HashTable and returns an array of HashRecord pointers that has been sorted by hash
+HashRecord ** sortRecords(HashTable * hashTable){
+  HashRecord * current = hashTable->head;
+  HashRecord * currLowest = current;
+  uint32_t currHash = 4294967295;
+  uint32_t lowestHash = 0;
+
+  long long int difference1 = 0;
+  long long int difference2 = 0;
+
+  HashRecord ** sortedRecords = (HashRecord **)malloc(sizeof(HashRecord *) * hashTable->count);
+
+  for (int i = 0; i < hashTable->count; i++){
+    // Find the lowest Hash
+    while (current != NULL){
+      if (lowestHash < current->hash && current->hash < currHash){
+        currLowest = current;
+        currHash = current->hash;
+      }
+      current = current->next;
+    }
+    sortedRecords[i] = currLowest;
+    lowestHash = currLowest->hash;
+    currHash = 4294967295;
+    current = hashTable->head;
+  }
+
+  return sortedRecords;
+}
+
+// 2569965317 10011001001011101000111100000101
+// 2147483648 10000000000000000000000000000000
+// 1874280167 01101111101101110011111011100111
 //              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                             PRINT FUNCTIONS
 //              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -232,6 +267,16 @@ void printTable(HashTable *hashTable) {
   printf("|\n");
 }
 
+
+void printTableToFile(FILE * filePtr, HashTable * hashTable){
+  // Sort all the records by hash
+  HashRecord ** sortedRecords = sortRecords(hashTable);
+
+  for (int i = 0; i < hashTable->count; i++){
+    fprintf(filePtr, "%u, %s, %u\n", sortedRecords[i]->hash, sortedRecords[i]->name, sortedRecords[i]->salary);
+  }
+}
+
 // =================================================================================
 //  ------------------------- COMMANDS READ FUNCTIONS --------------------------
 // =================================================================================
@@ -260,6 +305,7 @@ HashTable *readCommands(FILE *ptr) {
 
   // Free the memory allocated for the commands
   freeCommands(cmds);
+
 
   //printf("\n\nFinal Table:\n");
   //printTable(hashTable);

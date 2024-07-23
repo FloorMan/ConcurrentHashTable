@@ -2,6 +2,7 @@
 #ifndef CHASH_H
 #define CHASH_H
 #include <stdint.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -50,6 +51,8 @@ int insert(HashTable *hashTable, char *name, uint32_t salary);
 int delete(HashTable *hashTable, char *name);
 HashRecord *search(HashTable *hashTable, char *name);
 void printTable(HashTable *hashTable);
+void printTableToFile(FILE * filePtr, HashTable * hashTable);
+HashRecord ** sortRecords(HashTable * hashTable);
 HashTable *readCommands(FILE *fileptr);
 
 #endif
